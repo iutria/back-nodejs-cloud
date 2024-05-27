@@ -10,7 +10,7 @@ app.use(express.json());
 app.use('/api', router);
 app.use('/temp', express.static('temp'))
 
-const port = 3000;
+const port = 80;
 
 app.listen(
     port,
