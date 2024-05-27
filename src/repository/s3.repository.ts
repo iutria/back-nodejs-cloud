@@ -9,7 +9,9 @@ export const saveFile = async(params: any, path: any) : Promise<string>=>{
                 ...params
             }, 
             (err: any, data: any) => {
-                fs.unlink(path, (err) => {})
+                if(path){
+                    fs.unlink(path, (err) => {})
+                }
                 if (err) {
                     reject('error');
                 } else {

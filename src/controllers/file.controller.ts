@@ -10,7 +10,7 @@ export const getFilesController = async(req: Request, res: Response)=>{
         const files : File[] = await getFilesRepository();
         res.status(200).json(files);
     } catch (error) {
-        res.status(500).json({error: error});
+        res.status(500).json({message: error});
     }
 }
 
@@ -18,9 +18,13 @@ export const getFileController = async(req: Request, res: Response)=>{
     try {
         const fileId : string = req.params.id;
         const file : File = await getFileRepository(fileId);
-        res.status(200).json(file);
+        if(!file){
+            res.status(404).json({message: 'Archivo no encontrado'})
+        }else{
+            res.status(200).json(file);
+        }
     } catch (error) {
-        res.status(500).json({error: error});
+        res.status(500).json({message: error});
     }
 }
 
@@ -30,20 +34,22 @@ export const postFileController = async(req: Request, res: Response)=>{
         const reqFile = req.file;
         const file = fs.createReadStream(reqFile.path);
         const ext = path.extname(reqFile.originalname);
+        const title = req.body.title.replace(/ /g,'_') + ext
 
         const params = {
-            Key: req.body.title + ext,
+            Key: title,
             Body: file
         };
 
-        const url = await saveFile(params, reqFile.path);
+        let url = await saveFile(params, reqFile.path);
         const data : File = req.body;
         data.ext = ext;
+        data.title = title;
         data.url = url;
         const resp : File = await addFileRepository(data);
         res.status(200).json({message: 'agregado correctamente', data: resp});
     } catch (error) {
-        res.status(500).json(error);
+        res.status(500).json({message: error});
     }    
 }
 
@@ -54,7 +60,7 @@ export const putFileController = async(req: Request, res: Response)=>{
         await updateFileRepository(file, id);
         res.status(200).json({message: 'Modificado correctamente'});
     } catch (error) {
-        res.status(500).json(error);
+        res.status(500).json({message: error});
     }
 }
 
@@ -70,6 +76,6 @@ export const deleteFileController = async(req: Request, res: Response)=>{
         await deleteFileRepository(id);
         res.status(200).json({message: 'Eliminado correctamente'});
     } catch (error) {
-        res.status(500).json(error);
+        res.status(500).json({message: error});
     }
 }
